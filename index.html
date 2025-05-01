@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elegant Markdown Reader</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/contrib/auto-render.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+ <style>
+ @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
+
+ body {
+ background-color: #1E1E2E;
+ font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+ color: #E2E8F0;
+ }
+
+ .paper {
+ background: linear-gradient(135deg, #2A2A3C 0%, #1F1F2F 100%);
+ box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.15);
+ border: 1px solid #3B3B4F;
+ border-radius: 12px;
+ }
+
+ .app-gradient {
+ background: linear-gradient(120deg, #2B2B4A 0%, #1E1E2E 100%);
+ }
+
+ .button-gradient {
+ background: linear-gradient(90deg, #60A5FA 0%, #3B82F6 100%);
+ }
+
+ .button-gradient-alt {
+ background: linear-gradient(90deg, #34D399 0%, #10B981 100%);
+ }
+
+ .button-gradient-muted {
+ background: linear-gradient(90deg, #4B5563 0%, #6B7280 100%);
+ }
+
+ .markdown-body {
+ line-height: 1.7;
+ color: #E2E8F0;
+ }
+
+ .markdown-body h1 {
+ font-size: 2.2em;
+ margin-top: 1.2em;
+ margin-bottom: 0.6em;
+ border-bottom: 1px solid #4B5563;
+ padding-bottom: 0.3em;
+ font-weight: 600;
+ background: linear-gradient(90deg, #60A5FA 0%, #A78BFA 100%);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ background-clip: text;
+ }
+
+ .markdown-body h2 {
+ font-size: 1.7em;
+ margin-top: 1em;
+ margin-bottom: 0.5em;
+ border-bottom: 1px solid #4B5563;
+ padding-bottom: 0.3em;
+ font-weight: 500;
+ background: linear-gradient(90deg, #34D399 0%, #10B981 100%);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ background-clip: text;
+ }
+
+ .markdown-body h3 {
+ font-size: 1 .4em;
+ margin-top: 1em;
+ margin-bottom: 0.5em;
+ font-weight: 500;
+ color: #93C5FD;
+ }
+
+ .markdown-body h4 {
+ font-size: 1.1em;
+ margin-top: 1em;
+ margin-bottom: 0.5em;
+ font-weight: 500;
+ color: #6EE7B7;
+ }
+
+ .markdown-body p {
+ margin-top: 0;
+ margin-bottom: 1em;
+ }
+
+ .markdown-body blockquote {
+ padding: 0.5em 1em;
+ color: #D1D5DB;
+ border-left: 0.25em solid #60A5FA;
+ margin: 0 0 1em 0;
+ background-color: rgba(59, 130, 246, 0.05);
+ border-radius: 0 8px 8px 0;
+ }
+
+ .markdown-body code {
+ background-color: rgba(75, 85, 99, 0.2);
+ border-radius: 6px;
+ font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+ padding: 0.2em 0.4em;
+ font-size: 85%;
+ color: #F472B6;
+ }
+
+ .markdown-body pre {
+ background-color: #2A2A3C;
+ border-radius: 8px;
+ padding: 16px;
+ overflow: auto;
+ margin-bottom: 1em;
+ border: 1px solid #3B3B4F;
+ }
+
+ .markdown-body pre code {
+ background-color: transparent;
+ padding: 0;
+ color: #E2E8F0;
+ }
+
+ .markdown-body table {
+ border-collapse: collapse;
+ width: 100%;
+ margin-bottom: 1em;
+ }
+
+ .markdown-body table th,
+ .markdown-body table td {
+ padding: 8px 16px;
+ border: 1px solid #4B5563;
+ }
+
+ .markdown-body table th {
+ background-color: rgba(96, 165, 250, 0.15);
+ }
+
+ .markdown-body table tr {
+ background-color: #2A2A3C;
+ border-top: 1px solid #4B5563;
+ }
+
+ .markdown-body table tr:nth-child(2n) {
+ background-color: #353548;
+ }
+
+ .markdown-body img {
+ max-width: 100%;
+ box-sizing: content-box;
+ border-radius: 8px;
+ }
+
+ .markdown-body ul,
+ .markdown-body ol {
+ padding-left: 2em;
+ margin-bottom: 1em;
+ }
+
+ .markdown-body ul li::marker {
+ color: #60A5FA;
+ }
+
+ .markdown-body ol li::marker {
+ color: #A78BFA;
+ }
+
+ .markdown-body hr {
+ height: 0.25em;
+ padding: 0;
+ margin: 24px 0;
+ background: linear-gradient(90deg, #60A5FA 0%, #A78BFA 100%);
+ border: 0;
+ border-radius: 4px;
+ }
+
+ .markdown-body a {
+ color: #60A5FA;
+ text-decoration: none;
+ border-bottom: 1px dashed #60A5FA;
+ transition: all 0.2s ease;
+ }
+
+ .markdown-body a:hover {
+ color: #93C5FD;
+ border-bottom: 1px solid #93C5FD;
+ }
+
+ .controls-overlay {
+ transition: all 0.3s ease;
+ }
+
+ /* Styles for KaTeX to match dark mode */
+ .katex {
+ color: #E2E8F0;
+ }
+
+ /* Custom scrollbar for dark mode */
+ ::-webkit-scrollbar {
+ width: 10px;
+ height: 10px;
+ }
+
+ ::-webkit-scrollbar-track {
+ background: #2A2A3C;
+ }
+
+ ::-webkit-scrollbar-thumb {
+ background: #4B5563;
+ border-radius: 10px;
+ }
+
+ ::-webkit-scrollbar-thumb:hover {
+ background: #60A5FA;
+ }
+</style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <header class="app-gradient shadow-lg py-6">
+    <div class="container mx-auto px-6">
+     <h1 class="text-3xl font-medium text-white tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-400">Elegant Markdown Reader</h1>
+    </div>
+  </header>
+
+  <main class="flex-1 container mx-auto px-4 py-8">
+    <div id="input-section" class="mb-8">
+      <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+        <textarea 
+id="markdown-input" 
+class="flex-1 p-6 border border-gray-600 rounded-xl bg-gray-800 text-gray-100 shadow-inner h-64 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+placeholder="Paste your Markdown here... You can use LaTeX in-line like $E=mc^2$ or in blocks like $\sum_{i=1}^n i = \frac{n(n+1)}{2}$"
+spellcheck="false"></textarea>
+        <div class="flex flex-col space-y-6">
+          <label class="flex flex-col items-center px-4 py-6 bg-gray-800 text-blue-400 rounded-xl shadow-lg tracking-wide uppercase border border-gray-600 cursor-pointer hover:bg-gray-700 transition-colors duration-200">
+            <svg class="w-8 h-8" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
+            </svg>
+            <span class="mt-2 text-base leading-normal">Select file</span>
+            <input type='file' id="file-input" class="hidden" accept=".md, .markdown, .txt" />
+          </label>
+          <button id="render-btn" class="button-gradient text-white font-medium py-5 px-6 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 hover:opacity-90 transition-all duration-200">
+            Render
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="reader-section" class="hidden">
+      <div class="relative">
+        <div class="controls-overlay absolute top-6 right-6 opacity-100 hover:opacity-100 z-10">
+          <button id="close-btn" class="button-gradient-muted hover:opacity-90 text-white font-medium py-3 px-6 rounded-lg shadow transition-all duration-200">
+            Close
+          </button>
+        </div>
+        <div class="paper p-8 sm:p-12 max-w-4xl mx-auto">
+          <div id="markdown-output" class="markdown-body"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="app-gradient border-t border-gray-800 py-6 mt-8">
+    <div class="container mx-auto px-4 text-center text-gray-400 text-sm">
+      Elegant Markdown Reader with LaTeX support
+    </div>
+  </footer>
+
+  <script>
+    // Configure marked with highlight.js for code highlighting
+    marked.setOptions({
+      highlight: function(code, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+          return hljs.highlight(code, { language: lang }).value;
+        }
+        return hljs.highlightAuto(code).value;
+      },
+      breaks: true,
+      gfm: true
+    });
+
+    // Get DOM elements
+    const markdownInput = document.getElementById('markdown-input');
+    const fileInput = document.getElementById('file-input');
+    const renderBtn = document.getElementById('render-btn');
+    const closeBtn = document.getElementById('close-btn');
+    const markdownOutput = document.getElementById('markdown-output');
+    const inputSection = document.getElementById('input-section');
+    const readerSection = document.getElementById('reader-section');
+
+    // Handle file input
+    fileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        markdownInput.value = e.target.result;
+      };
+      reader.readAsText(file);
+    });
+
+    // Render markdown
+    renderBtn.addEventListener('click', function() {
+      const markdown = markdownInput.value;
+      if (!markdown.trim()) {
+        alert('Please enter some Markdown text or load a file.');
+        return;
+      }
+
+      // Convert markdown to HTML
+      markdownOutput.innerHTML = marked.parse(markdown);
+      
+      // Render LaTeX
+      renderMathInElement(markdownOutput, {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ],
+        throwOnError: false
+      });
+
+      // Show reader section and hide input section
+      inputSection.classList.add('hidden');
+      readerSection.classList.remove('hidden');
+
+      // Apply code highlighting
+      document.querySelectorAll('pre code').forEach((block) => {
+        hljs.highlightBlock(block);
+      });
+    });
+
+    // Close reader and show input again
+    closeBtn.addEventListener('click', function() {
+      readerSection.classList.add('hidden');
+      inputSection.classList.remove('hidden');
+    });
+
+    // Example markdown for initial content
+    const exampleMarkdown = `# Welcome to Elegant Markdown Reader
+
+## Features
+
+This simple markdown reader supports:
+
+- **Bold**, *italic*, and ~~strikethrough~~ text
+- [Links](https://example.com)
+- Images
+- Code blocks with syntax highlighting
+- LaTeX math expressions
+- Tables and blockquotes
+
+## LaTeX Examples
+
+Inline math: $E = mc^2$ or $\\pi \\approx 3.14159$
+
+Display math:
+
+$$
+\\frac{d}{dx}\\left( \\int_{a}^{x} f(u)\\,du\\right)=f(x)
+$$
+
+$$
+\\begin{pmatrix}
+a & b \\\\
+c & d
+\\end{pmatrix}
+$$
+
+## Code Example
+
+\`\`\`javascript
+function factorial(n) {
+  if (n === 0 || n === 1) {
+    return 1;
+  }
+  return n * factorial(n - 1);
+}
+
+console.log(factorial(5)); // 120
+\`\`\`
+
+## Table Example
+
+| Syntax | Description |
+| ------ | ----------- |
+| Header | Title |
+| Paragraph | Text |
+
+## Blockquote
+
+> This is a blockquote.
+> 
+> It can span multiple lines.
+
+---
+
+Upload your own markdown file or edit the text in the input area to see it rendered.`;
+
+    // Set example markdown as initial content
+    markdownInput.value = exampleMarkdown;
+  </script>
+</body>
+</html>
