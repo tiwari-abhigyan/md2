@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Elegant Markdown Reader</title>
+  <title>Vibed Markdown Reader</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/contrib/auto-render.min.js"></script>
@@ -11,12 +11,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=SF+Pro+Display:wght@300;400;500;600;700&display=swap">
  <style>
- @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
-
  body {
  background-color: #1E1E2E;
- font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+ font-family: 'JetBrains Mono', 'SF Pro Display', -apple-system, BlinkMacSystemFont, monospace;
  color: #E2E8F0;
  }
 
@@ -46,6 +45,7 @@
  .markdown-body {
  line-height: 1.7;
  color: #E2E8F0;
+ font-family: 'JetBrains Mono', monospace;
  }
 
  .markdown-body h1 {
@@ -75,7 +75,7 @@
  }
 
  .markdown-body h3 {
- font-size: 1 .4em;
+ font-size: 1.4em;
  margin-top: 1em;
  margin-bottom: 0.5em;
  font-weight: 500;
@@ -107,7 +107,7 @@
  .markdown-body code {
  background-color: rgba(75, 85, 99, 0.2);
  border-radius: 6px;
- font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+ font-family: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
  padding: 0.2em 0.4em;
  font-size: 85%;
  color: #F472B6;
@@ -221,18 +221,58 @@
  ::-webkit-scrollbar-thumb:hover {
  background: #60A5FA;
  }
+
+ /* Custom styles for saved documents */
+ .saved-document {
+   transition: all 0.2s ease;
+   cursor: pointer;
+ }
+
+ .saved-document:hover {
+   transform: translateY(-2px);
+   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+ }
+
+ .saved-document-preview {
+   max-height: 150px;
+   overflow: hidden;
+   position: relative;
+ }
+
+ .saved-document-preview::after {
+   content: '';
+   position: absolute;
+   bottom: 0;
+   left: 0;
+   width: 100%;
+   height: 50px;
+   background: linear-gradient(transparent, #2A2A3C);
+ }
+
+ /* Monospace font for text areas and code */
+ textarea, code, pre {
+   font-family: 'JetBrains Mono', monospace !important;
+ }
+
+ /* Reader width on large screens */
+ @media (min-width: 1024px) {
+   .reader-container {
+     width: 70%;
+     margin: 0 auto;
+   }
+ }
 </style>
 </head>
 <body class="min-h-screen flex flex-col">
 <!--   <header class="app-gradient shadow-lg py-6">
     <div class="container mx-auto px-6">
-     <h1 class="text-3xl font-medium text-white tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-400">Elegant Markdown Reader</h1>
+     <h1 class="text-3xl font-medium text-white tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-400">Vibed Markdown Reader</h1>
     </div>
   </header> -->
 
   <main class="flex-1 container mx-auto px-4 py-8">
     <div id="input-section" class="mb-8">
-      <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+      <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
         <textarea 
 id="markdown-input" 
 class="flex-1 p-6 border border-gray-600 rounded-xl bg-gray-800 text-gray-100 shadow-inner h-64 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
@@ -249,13 +289,50 @@ spellcheck="false"></textarea>
           <button id="render-btn" class="button-gradient text-white font-medium py-5 px-6 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 hover:opacity-90 transition-all duration-200">
             Render
           </button>
+          <div class="flex space-x-2">
+            <button id="save-btn" class="button-gradient-alt text-white font-medium py-3 px-6 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 hover:opacity-90 transition-all duration-200 flex-1">
+              Save
+            </button>
+            <button id="clear-btn" class="button-gradient-muted text-white font-medium py-3 px-6 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 hover:opacity-90 transition-all duration-200 flex-1">
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Saved Documents Section -->
+      <div id="saved-documents-section" class="mt-8 bg-gray-800/30 rounded-xl p-6 border border-gray-700">
+        <h2 class="text-xl font-medium text-blue-400 mb-4">Saved Documents</h2>
+        <div id="saved-documents-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto p-2">
+          <!-- Saved documents will be loaded here dynamically -->
+          <div class="saved-documents-placeholder text-gray-400 text-center py-10 col-span-3">
+            No saved documents yet. Save a document to see it here.
+          </div>
+        </div>
+      </div>
+
+      <!-- Save Document Modal -->
+      <div id="save-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-xl p-8 max-w-md w-full">
+          <h3 class="text-xl font-medium text-blue-400 mb-4">Save Document</h3>
+          <div class="mb-4">
+            <label for="document-title" class="block text-sm font-medium text-gray-300 mb-2">Document Title</label>
+            <input id="document-title" type="text" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter a title for your document">
+          </div>
+          <div class="flex justify-end space-x-3">
+            <button id="cancel-save" class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">Cancel</button>
+            <button id="confirm-save" class="px-4 py-2 button-gradient text-white rounded-lg hover:opacity-90 transition-colors">Save</button>
+          </div>
         </div>
       </div>
     </div>
     
     <div id="reader-section" class="hidden">
-      <div class="relative">
-        <div class="controls-overlay absolute top-6 right-6 opacity-100 hover:opacity-100 z-10">
+      <div class="relative reader-container">
+        <div class="controls-overlay absolute top-6 right-6 opacity-100 hover:opacity-100 z-10 flex space-x-2">
+          <button id="save-current-btn" class="button-gradient-alt hover:opacity-90 text-white font-medium py-3 px-6 rounded-lg shadow transition-all duration-200">
+            Save
+          </button>
           <button id="close-btn" class="button-gradient-muted hover:opacity-90 text-white font-medium py-3 px-6 rounded-lg shadow transition-all duration-200">
             Close
           </button>
@@ -269,7 +346,7 @@ spellcheck="false"></textarea>
 
   <footer class="app-gradient border-t border-gray-800 py-6 mt-8">
     <div class="container mx-auto px-4 text-center text-gray-400 text-sm">
-      Elegant Markdown Reader with LaTeX support
+      Vibed Markdown Reader with LaTeX support
     </div>
   </footer>
 
@@ -294,6 +371,21 @@ spellcheck="false"></textarea>
     const markdownOutput = document.getElementById('markdown-output');
     const inputSection = document.getElementById('input-section');
     const readerSection = document.getElementById('reader-section');
+    const saveBtn = document.getElementById('save-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const saveModal = document.getElementById('save-modal');
+    const documentTitle = document.getElementById('document-title');
+    const cancelSave = document.getElementById('cancel-save');
+    const confirmSave = document.getElementById('confirm-save');
+    const savedDocumentsContainer = document.getElementById('saved-documents-container');
+    const saveCurrentBtn = document.getElementById('save-current-btn');
+
+    // Storage key for saved documents
+    const STORAGE_KEY = 'elegant-markdown-saved-documents';
+    let currentDocumentId = null;
+
+    // Load saved documents when page loads
+    loadSavedDocuments();
 
     // Handle file input
     fileInput.addEventListener('change', function(e) {
@@ -309,6 +401,10 @@ spellcheck="false"></textarea>
 
     // Render markdown
     renderBtn.addEventListener('click', function() {
+      renderMarkdown();
+    });
+
+    function renderMarkdown() {
       const markdown = markdownInput.value;
       if (!markdown.trim()) {
         alert('Please enter some Markdown text or load a file.');
@@ -337,16 +433,210 @@ spellcheck="false"></textarea>
       document.querySelectorAll('pre code').forEach((block) => {
         hljs.highlightBlock(block);
       });
-    });
+    }
 
     // Close reader and show input again
     closeBtn.addEventListener('click', function() {
       readerSection.classList.add('hidden');
       inputSection.classList.remove('hidden');
+      currentDocumentId = null; // Reset current document when closing
     });
 
+    // Save button click handler
+    saveBtn.addEventListener('click', function() {
+      if (!markdownInput.value.trim()) {
+        alert('Please enter some Markdown text before saving.');
+        return;
+      }
+      openSaveModal();
+    });
+
+    // Save from reader view
+    saveCurrentBtn.addEventListener('click', function() {
+      openSaveModal();
+    });
+
+    // Clear button click handler
+    clearBtn.addEventListener('click', function() {
+      markdownInput.value = '';
+    });
+
+    // Cancel save modal
+    cancelSave.addEventListener('click', function() {
+      closeSaveModal();
+    });
+
+    // Confirm save document
+    confirmSave.addEventListener('click', function() {
+      const title = documentTitle.value.trim();
+      if (!title) {
+        alert('Please enter a title for your document.');
+        return;
+      }
+
+      saveDocument(title, markdownInput.value);
+      closeSaveModal();
+    });
+
+    // Helper function to open save modal
+    function openSaveModal() {
+      saveModal.classList.remove('hidden');
+      documentTitle.focus();
+      
+      // If we're editing an existing document, pre-fill the title
+      if (currentDocumentId) {
+        const savedDocs = getSavedDocuments();
+        const doc = savedDocs.find(doc => doc.id === currentDocumentId);
+        if (doc) {
+          documentTitle.value = doc.title;
+        }
+      } else {
+        documentTitle.value = '';
+      }
+    }
+
+    // Helper function to close save modal
+    function closeSaveModal() {
+      saveModal.classList.add('hidden');
+    }
+
+    // Save document to localStorage
+    function saveDocument(title, content) {
+      const savedDocs = getSavedDocuments();
+      const timestamp = new Date().toISOString();
+
+      if (currentDocumentId) {
+        // Update existing document
+        const docIndex = savedDocs.findIndex(doc => doc.id === currentDocumentId);
+        if (docIndex !== -1) {
+          savedDocs[docIndex] = {
+            ...savedDocs[docIndex],
+            title,
+            content,
+            updatedAt: timestamp
+          };
+        }
+      } else {
+        // Create new document
+        const newDoc = {
+          id: generateId(),
+          title,
+          content,
+          createdAt: timestamp,
+          updatedAt: timestamp
+        };
+        savedDocs.push(newDoc);
+      }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedDocs));
+      loadSavedDocuments();
+    }
+
+    // Get saved documents from localStorage
+    function getSavedDocuments() {
+      const savedDocsJson = localStorage.getItem(STORAGE_KEY);
+      return savedDocsJson ? JSON.parse(savedDocsJson) : [];
+    }
+
+    // Load and display saved documents
+    function loadSavedDocuments() {
+      const savedDocs = getSavedDocuments();
+      savedDocumentsContainer.innerHTML = '';
+
+      if (savedDocs.length === 0) {
+        savedDocumentsContainer.innerHTML = `
+          <div class="saved-documents-placeholder text-gray-400 text-center py-10 col-span-3">
+            No saved documents yet. Save a document to see it here.
+          </div>
+        `;
+        return;
+      }
+
+      // Sort documents by updated date (newest first)
+      savedDocs.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+      savedDocs.forEach(doc => {
+        const previewHtml = marked.parse(doc.content.substring(0, 200) + (doc.content.length > 200 ? '...' : ''));
+        const docElement = document.createElement('div');
+        docElement.className = 'saved-document bg-gray-800 rounded-lg shadow-lg border border-gray-700 overflow-hidden';
+        docElement.innerHTML = `
+          <div class="p-4 border-b border-gray-700">
+            <div class="flex justify-between items-center">
+              <h3 class="text-blue-400 font-medium truncate">${doc.title}</h3>
+              <div class="flex space-x-1">
+                <button class="delete-doc p-1 text-red-400 hover:text-red-300 transition-colors" data-id="${doc.id}">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="text-gray-400 text-xs mt-1">
+              Updated: ${formatDate(doc.updatedAt)}
+            </div>
+          </div>
+          <div class="saved-document-preview p-4 bg-gray-900/30" data-id="${doc.id}">
+            <div class="text-sm text-gray-300">${previewHtml}</div>
+          </div>
+        `;
+        savedDocumentsContainer.appendChild(docElement);
+        
+        // Add click handler to load document
+        docElement.querySelector('.saved-document-preview').addEventListener('click', function() {
+          loadDocument(doc.id);
+        });
+        
+        // Add click handler to delete document
+        docElement.querySelector('.delete-doc').addEventListener('click', function(e) {
+          e.stopPropagation(); // Prevent triggering the parent click handler
+          if (confirm(`Are you sure you want to delete "${doc.title}"?`)) {
+            deleteDocument(doc.id);
+          }
+        });
+      });
+    }
+
+    // Load a document from storage
+    function loadDocument(id) {
+      const savedDocs = getSavedDocuments();
+      const doc = savedDocs.find(doc => doc.id === id);
+      
+      if (doc) {
+        markdownInput.value = doc.content;
+        currentDocumentId = doc.id; // Set current document id
+        renderMarkdown();
+      }
+    }
+
+    // Delete a document from storage
+    function deleteDocument(id) {
+      let savedDocs = getSavedDocuments();
+      savedDocs = savedDocs.filter(doc => doc.id !== id);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedDocs));
+      loadSavedDocuments();
+      
+      // If we're viewing the document that was just deleted, clear the editor
+      if (currentDocumentId === id) {
+        markdownInput.value = '';
+        currentDocumentId = null;
+      }
+    }
+
+    // Helper function to generate a simple ID
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    }
+
+    // Helper function to format dates nicely
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+      return date.toLocaleDateString(undefined, options);
+    }
+
     // Example markdown for initial content
-    const exampleMarkdown = `# Welcome to Elegant Markdown Reader
+    const exampleMarkdown = `# Welcome to Vibed Markdown Reader
 
 ## Features
 
